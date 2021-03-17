@@ -1,17 +1,23 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"><template v-slot:center><div>购物街</div></template></nav-bar>
+    <tab-control :titles="['流行','新款','精选']"  
+                  @tabClick="tabClick"
+                  ref="tabControl1"
+                  class="tab-control"
+                  v-show="isTabFixed"/>
     <scroll class="content" ref="scroll" 
             :probeType="3" 
             @scroll="contentScroll"
-            :pullUpLoad="true"
+            :pull-up-load="true"
             @pullingUp="loadMore">
-      <home-swiper :banners="banners" />
+            
+      <home-swiper :banners="banners" @swiperImageLoad="swiperImageLoad" />
       <recommend-view :recommends="recommends" />
       <feature-view class="feature"/>
       <tab-control :titles="['流行','新款','精选']" 
-                  class="tab-control"
-                  @tabClick="tabClick"/>
+                  @tabClick="tabClick"
+                  ref="tabControl2"/>
       <goods-list :goods="showGoods" />
       
     </scroll>
@@ -31,7 +37,7 @@ import Scroll from 'components/common/scroll/Scroll'
 import BackTop from 'components/content/backTop/BackTop'
 
 import {getHomeMultidata,getHomeGoods} from 'network/home'
-
+import {debounce} from 'common/utils.js'
 
 export default {
   name: 'Home',
@@ -55,7 +61,10 @@ export default {
         'sell': {page: 0, list: []},
       },
       currentType: 'pop',
-      isShowBackTop: false
+      isShowBackTop: false,
+      tabOffsetTop: 0,
+      isTabFixed: false,
+      saveY: 0
     }
   },
   created () { 
@@ -65,16 +74,44 @@ export default {
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
     this.getHomeGoods('sell')
+
+    
+  },
+  mounted () {
+    //1.监听item图片加载完成
+    const refresh = debounce(this.$refs.scroll.refresh, 500)
+
+    this.$bus.$on("itemImageLoad", () => {
+      refresh()
+    })
+   
+    
   },
   computed: {
     showGoods () {
       return this.goods[this.currentType].list
+      
     }
+  },
+  activated (){
+    this.$refs.scroll.scrollTo(0, this.saveY, 0)
+    this.$refs.scroll.refresh()
+  },
+  deactivated (){
+    this.saveY = this.$refs.scroll.getScrollY()
   },
   methods: {
     /**
      * 事件监听相关的方法
      */
+    swiperImageLoad () {
+       //获取tabControl的offsetTop
+      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
+    },
+    loadMore () {
+      this.getHomeGoods(this.currentType)
+    },
+
     tabClick (index) {
       switch (index) {
         case 0:
@@ -87,6 +124,8 @@ export default {
           this.currentType = 'sell'
           break
       }
+      this.$refs.tabControl1.currentIndex = index
+      this.$refs.tabControl2.currentIndex = index
     },
     
     backClick () {
@@ -94,11 +133,13 @@ export default {
     },
 
     contentScroll (position) {
+      //1.判断backTop是否显示
       this.isShowBackTop = (-position.y) > 1000
+
+      //2.决定tabControl是否吸顶
+      this.isTabFixed = (-position.y) > this.tabOffsetTop
     },
-    loadMore () {
-      this.getHomeGoods(this.currentType)
-    },
+    
     /**
      * 网络请求相关的 方法
      */
@@ -114,6 +155,7 @@ export default {
         this.goods[type].list.push(...res.data.list)
         this.goods[type].page += 1
 
+        //完成上拉加载更多
         this.$refs.scroll.finishPullUp()
       })
     }
@@ -131,21 +173,42 @@ export default {
     background-color: var(--color-tint);
     color: #fff;
 
-    position: fixed;
+    /* position: fixed;
     left: 0;
     right: 0;
     top: 0;
-    z-index: 9;
+    z-index: 9; */
   }
   
+  .content {
+    overflow: hidden;
+
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
+  }
+  .fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 44px;
+  }
   .tab-control {
+    position: relative;
+    z-index: 99;
+  }
+  /* .tab-control {
     position: sticky;
     top: 44px;
     background-color: #fff;
-  }
-  .content {
-    height: calc(100% - 49px);
+  } */
+  /* .content {
+    height: calc(100% - 49px - 44px );
     overflow: hidden;
     margin-top: 44px;
-  }
+    
+  } */
+  
 </style>
