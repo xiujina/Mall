@@ -21,7 +21,7 @@
       <goods-list :goods="showGoods" />
       
     </scroll>
-    <back-top @click.native="backClick" v-show="isShowBackTop" />
+    <back-top @click.native="backTop" v-show="isShowBackTop" />
   </div>
   
 </template>
@@ -34,10 +34,9 @@ import NavBar from 'components/common/navbar/NavBar'
 import TabControl from 'components/content/tabControl/TabControl'
 import GoodsList from 'components/content/goods/GoodsList'
 import Scroll from 'components/common/scroll/Scroll'
-import BackTop from 'components/content/backTop/BackTop'
 
 import {getHomeMultidata,getHomeGoods} from 'network/home'
-import {debounce} from 'common/utils.js'
+import {itemListenerMixin, backTopMixin} from 'common/mixin'
 
 export default {
   name: 'Home',
@@ -48,8 +47,7 @@ export default {
     FeatureView,
     TabControl,
     GoodsList,
-    Scroll,
-    BackTop
+    Scroll
   },
   data () {
     return {
@@ -61,12 +59,12 @@ export default {
         'sell': {page: 0, list: []},
       },
       currentType: 'pop',
-      isShowBackTop: false,
       tabOffsetTop: 0,
       isTabFixed: false,
       saveY: 0
     }
   },
+  mixins: [itemListenerMixin, backTopMixin],
   created () { 
     //1.请求首页数据
     this.getHomeMultidata()
@@ -74,17 +72,8 @@ export default {
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
     this.getHomeGoods('sell')
-
-    
   },
   mounted () {
-    //1.监听item图片加载完成
-    const refresh = debounce(this.$refs.scroll.refresh, 500)
-
-    this.$bus.$on("itemImageLoad", () => {
-      refresh()
-    })
-   
     
   },
   computed: {
@@ -99,6 +88,9 @@ export default {
   },
   deactivated (){
     this.saveY = this.$refs.scroll.getScrollY()
+
+    //2.取消全局事件的监听
+    this.$bus.$off('itemImageLoad',this.itemImgListener)
   },
   methods: {
     /**
@@ -110,6 +102,7 @@ export default {
     },
     loadMore () {
       this.getHomeGoods(this.currentType)
+      this.$refs.scroll.scroll.refresh()
     },
 
     tabClick (index) {
@@ -126,10 +119,6 @@ export default {
       }
       this.$refs.tabControl1.currentIndex = index
       this.$refs.tabControl2.currentIndex = index
-    },
-    
-    backClick () {
-      this.$refs.scroll.scrollTo(0, 0)
     },
 
     contentScroll (position) {

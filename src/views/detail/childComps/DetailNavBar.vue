@@ -1,5 +1,5 @@
 <template>
-  <nav-bar>
+  <nav-bar class="detail-nav">
     <template v-slot:left>
       <div class="back" @click="backClick">
         <img src="~assets/img/common/back.svg" alt="">
@@ -34,6 +34,7 @@ export default {
   methods: {
     titleClick (index) {
       this.currentIndex = index
+      this.$emit('titleClick',index)
     },
     backClick (){
       this.$router.go(-1)

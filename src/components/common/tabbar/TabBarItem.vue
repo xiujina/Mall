@@ -52,10 +52,3 @@ export default {
     margin-bottom: 2px;
   }
 </style>
-assets
-common
-components
-router
-network
-views
-store

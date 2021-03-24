@@ -2,7 +2,7 @@
   <div class="detail-swiper">
     <swiper class="swiper">
       <swiper-item  v-for="(item,index) in topImages" :key="index">
-        <img :src="item" alt="">
+        <img :src="item" alt="" >
       </swiper-item>
     </swiper>
   </div>
@@ -23,6 +23,14 @@ export default {
         return []
       }
     }
+  },
+  data () {
+    return {
+      isLoad: false
+    }
+  },
+  methods: {
+   
   }
 }
 </script>
