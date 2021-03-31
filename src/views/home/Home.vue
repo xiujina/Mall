@@ -68,6 +68,7 @@ export default {
   created () { 
     //1.请求首页数据
     this.getHomeMultidata()
+
     //2.请求商品数据
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
@@ -161,7 +162,8 @@ export default {
   .home-nav {
     background-color: var(--color-tint);
     color: #fff;
-
+    font-weight: 800;
+    
     /* position: fixed;
     left: 0;
     right: 0;

@@ -48,6 +48,7 @@ export default {
 
   .tab-control-item span {
     padding: 5px;
+    margin-bottom: 2px;
   }
 
   .active {

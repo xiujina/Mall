@@ -52,13 +52,13 @@ export default {
     flex: 1;
   }
   .bar-left .text {
-    font-size: 13px;
+    font-size: 12px;
   }
   .bar-left .icon {
     display: block;
     width: 22px;
     height: 22px;
-    margin: 5px auto 3px;
+    margin: 5px auto 0;
     background: url("~assets/img/detail/detail_bottom.png") 0 0/100%;
   }
   .bar-left .service {
@@ -75,6 +75,7 @@ export default {
   .bar-right .cart {
     background-color: #ffe817;
     color: #333;
+    padding: 0 2px;
   }
   .bar-right .buy {
     background-color: var(--color-high-text);

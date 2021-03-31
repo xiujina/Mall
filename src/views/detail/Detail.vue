@@ -4,7 +4,7 @@
     <scroll class="list-content" 
             ref="scroll" 
             @scroll="contentScroll"
-            :probe-type="3">
+            :probe-type="3"> 
       <detail-swiper :top-images="topImages" />
       <detail-base-info :goods="goods"/>
       <detail-shop-info :shop="shop" />
@@ -14,7 +14,8 @@
       <goods-list ref="recommend" :goods="recommends"/>
     </scroll>
     <detail-bottom-bar class="bottom-bar" @addCart = "addToCart" />  
-    <back-top @click.native="backTop" v-show="isShowBackTop" />  
+    <back-top @click.native="backTop" v-show="isShowBackTop" /> 
+    <!-- <toast :message="message" :show="show" />  -->
   </div>
 </template>
 <script>
@@ -30,9 +31,11 @@ import DetailBottomBar from './childComps/DetailBottomBar'
 
 import Scroll from 'components/common/scroll/Scroll'
 import GoodsList from 'components/content/goods/GoodsList.vue'
+// import Toast from 'components/common/toast/Toast'
 
 import {getDetail, Goods, Shop, GoodsParam, getRecommend} from 'network/detail'
 import {itemListenerMixin, backTopMixin} from 'common/mixin'
+import {mapActions} from 'vuex'
 
 export default {
   name: 'Detail',
@@ -46,7 +49,8 @@ export default {
     DetailParamInfo,
     DetailCommentInfo,
     GoodsList,
-    DetailBottomBar
+    DetailBottomBar,
+    // Toast
   },
   mixins: [itemListenerMixin, backTopMixin],
   data () {
@@ -60,7 +64,9 @@ export default {
       commentInfo: {},
       recommends: [],
       themeTopYs: [],
-      currentIndex: 0
+      currentIndex: 0,
+      // message: '',
+      // show: false
     }
   },
   created () {
@@ -68,7 +74,8 @@ export default {
     this.iid = this.$route.params.iid
     
     //2.根据保存的iid请求数据
-    getDetail(this.iid).then(res => {;
+    getDetail(this.iid).then(res => {
+
       //1.获取顶部图片数据
       const data = res.result
       this.topImages = data.itemInfo.topImages
@@ -100,7 +107,7 @@ export default {
     
   },
   mounted() {
-    console.log(this.$refs.scroll);
+
   },
   updated () {
     
@@ -109,6 +116,7 @@ export default {
     this.$bus.$off('itemImageLoad',this.itemImgListener)
   },
   methods: {
+    ...mapActions(['addCart']),
     imgLoad () {
       this.$refs.scroll.refresh()
 
@@ -119,7 +127,6 @@ export default {
       this.themeTopYs.push(this.$refs.comment.$el.offsetTop - 44)
       this.themeTopYs.push(this.$refs.recommend.$el.offsetTop - 44)
       this.themeTopYs.push(Number.MAX_VALUE)
-      console.log(this.themeTopYs);
     })
     },
     titleClick (index) {
@@ -145,11 +152,26 @@ export default {
     addToCart () {
       //1.获取购物车需要展示的信息
       const product = {}
-      product.image = this.topImage[0]
+      product.image = this.topImages[0]
       product.title = this.goods.title
       product.desc = this.goods.desc
-      product.price = this.goods.newPrice
+      product.price = this.goods.realPrice
       product.iid = this.iid
+
+      //2.将商品添加到购物车里
+      this.addCart(product).then(res => {
+        // this.show = true
+        // this.message = res 
+
+        // setTimeout(() => {
+        //   this.show = false
+        //   this.message = ''
+        // },1500)
+        this.$toast.show(res, 1500)
+      })
+      // this.$store.dispatch('addCart',product).then(res => {
+      //   console.log(res);
+      // })
     }
   }
 }

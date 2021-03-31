@@ -22,7 +22,7 @@
       <div class="shop-middle-item shop-middle-right">
         <table>
           <tr v-for="(item,index) in shop.score" :key="index">
-            <td>{{item.name}}</td>
+            <td calss="item-name">{{item.name}}</td>
             <td class="score" :class="{'score-better': item.isBetter}">{{item.score}}</td>
             <td class="better" :class="{'better-more': item.isBetter}"><span>{{item.isBetter ? '高' : '低'}}</span></td>
           </tr>
@@ -106,13 +106,16 @@ export default {
     line-height: 26px;
     display: flex;
     justify-content: space-between;
-    flex-grow: 0.9;
     padding-left: 32px;
+  }
+  .shop-middle-right .item-name {
+    flex-shrink: 1;
   }
   .shop-middle-right .score {
     color: #2a5;
     padding-left: 12px;
     padding-right: 12px;
+    flex-shrink: 0.8;
   }
   .shop-middle-right .score-better {
     color: #f00;
@@ -120,6 +123,7 @@ export default {
   .shop-middle-right .better span {
     background-color: #2a5;
     color: #fff;
+    flex-shrink: 0.8;
   }
   .shop-middle-right .better-more span {
     color: #fff;
@@ -136,6 +140,7 @@ export default {
     width: 150px;
     height: 30px;
     text-align: center;
+    vertical-align: middle;
     line-height: 30px;
     border-radius: 10px;
   }
